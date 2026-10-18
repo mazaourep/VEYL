@@ -130,7 +130,6 @@ These checks were run on the modules, the loader and the bundle:
 - Split the 7,000-line script into 30 modules under `src/`, connected through a shared context table. Imports and exports were generated mechanically and checked by the linter.
 - Added `loader.lua`: parallel download, compile-everything-before-running, retry, cache fallback, local mode, `VEYL_SOURCE` override, a Roblox notification on failure, and cleanup of partially started modules.
 - Added `dist/VEYL.lua` (generated single-file build), `tools/bundle.py`, and `tests/` with a loader test suite.
-- On shutdown, the config is now written only when there are unsaved changes, so a file edited on disk is not overwritten on re-execution.
 
 ### 2.0.0
 - Rewrote the earlier LocalScript as an executor-aware single file. Capability detection covers Drawing, `gethui`, file I/O, clipboard and identity, each with a fallback.
@@ -147,3 +146,4 @@ These checks were run on the modules, the loader and the bundle:
   - Glow layers stayed visible after closing.
   - Popups never closed.
 - Added the Weapons, Misc and Settings feature sets, a Music Hub with load-failure detection, rejoin modes and config persistence.
+- On shutdown, the config is written only when there are unsaved changes, so a file edited on disk is not overwritten on re-execution.
