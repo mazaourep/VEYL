@@ -28,7 +28,11 @@ return function(V)
         local countRow
 
         local function matches(entity)
-            if filterKind ~= "All" and entity.kind ~= filterKind then
+            if filterKind == "Allowed player" then
+                if entity.kind ~= "Player" or not Entities.isAllowed(entity) then
+                    return false
+                end
+            elseif filterKind ~= "All" and entity.kind ~= filterKind then
                 return false
             end
             return filterText == "" or string.find(string.lower(entity.name), filterText, 1, true) ~= nil
@@ -67,8 +71,9 @@ return function(V)
                     local distance = root and (root.Position - origin).Magnitude or nil
                     local humanoid = entity.humanoid
                     local health = humanoid and string.format("%d/%d HP", math.floor(humanoid.Health + 0.5), math.floor(humanoid.MaxHealth + 0.5)) or "no HP"
-                    local aimText = Aim.eligible(entity) and "aim ✓" or "aim ✗"
-                    detail.Text = string.format("%s · %s · %s · %s", entity.kind, distance and (math.floor(distance + 0.5) .. " st") or "no root", health, aimText)
+                    local aimText = Aim.eligible(entity) and "✓" or "—"
+                    local espText = ESP.eligible(entity) and "✓" or "—"
+                    detail.Text = string.format("%s · %s · %s · A:%s E:%s", entity.kind, distance and (math.floor(distance + 0.5) .. " st") or "no root", health, aimText, espText)
                     if allow then
                         allow.Text = Entities.isAllowed(entity) and "Revoke" or "Allow"
                     end
@@ -86,7 +91,7 @@ return function(V)
             label = "Type",
             desc = "Filter by classification.",
             options = function()
-                return { "All", "Test target", "Player", "NPC" }
+                return { "All", "Test target", "Player", "Allowed player", "NPC" }
             end,
             get = function()
                 return filterKind
@@ -161,7 +166,7 @@ return function(V)
 
         local allowSection = UI.section(page, "right", "Session allowlist")
         local allowRow = UI.info(allowSection, { label = "Allowlisted players", desc = "Session only; never saved to disk." })
-        UI.note(allowSection, "Players are excluded from Aim Lab and ESP until you allowlist them here for this session (for example your own test accounts).")
+        UI.note(allowSection, "Live players remain excluded from Aim Lab and ESP until you explicitly allowlist them for this session. Use this with consenting test participants; the allowlist is local to this VEYL session only.")
         UI.button(allowSection, {
             text = "Clear allowlist",
             desc = "Remove every player from the session allowlist.",

@@ -34,7 +34,7 @@ return function(V)
         local target = UI.section(page, "right", "Target")
         local selectedRow = UI.info(target, { label = "Selected", desc = "Explicit selection from Cycle or the Entities tab." })
         local currentRow = UI.info(target, { label = "Current aim target", desc = "Target chosen this frame (selection or best in FOV)." })
-        local eligibleRow = UI.info(target, { label = "Eligible targets", desc = "Alive entities inside the Aim Lab scope." })
+        local eligibleRow = UI.info(target, { label = "Eligible targets", desc = "Live players require explicit session allowlisting; NPCs and tagged test targets follow their own filters." })
         UI.buttons(target, {
             { text = "Cycle target", style = "primary", callback = Aim.cycle },
             { text = "Clear target", callback = function()
@@ -49,13 +49,20 @@ return function(V)
         page.onUpdate = function()
             selectedRow.set(Aim.selected and Aim.selected.name or "None", Aim.selected and T.text or T.muted)
             currentRow.set(Aim.current and Aim.current.name or (Settings.get("aim.enabled") and "None in range" or "Aim Lab off"), Aim.current and T.ok or T.muted)
-            local count = 0
+            local count, playerCount, npcCount, testCount = 0, 0, 0, 0
             for _, entity in pairs(Entities.byModel) do
                 if Aim.eligible(entity) then
                     count += 1
+                    if entity.kind == "Player" then
+                        playerCount += 1
+                    elseif entity.kind == "NPC" then
+                        npcCount += 1
+                    elseif entity.kind == "Test target" then
+                        testCount += 1
+                    end
                 end
             end
-            eligibleRow.set(tostring(count))
+            eligibleRow.set(string.format("%d total (P:%d · NPC:%d · T:%d)", count, playerCount, npcCount, testCount))
         end
     end
 end

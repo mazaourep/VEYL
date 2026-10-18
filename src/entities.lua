@@ -34,11 +34,13 @@ return function(V)
 
     local function entityKind(model)
         local player = Players:GetPlayerFromCharacter(model)
-        if CollectionService:HasTag(model, NAMES.tag) then
-            return "Test target", player
-        end
+        -- Live Player characters remain Players even if tagged as test targets.
+        -- Tags must never bypass the explicit per-session player allowlist.
         if player then
             return "Player", player
+        end
+        if CollectionService:HasTag(model, NAMES.tag) then
+            return "Test target", nil
         end
         return "NPC", nil
     end

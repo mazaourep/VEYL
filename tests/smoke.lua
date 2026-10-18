@@ -62,6 +62,67 @@ local other, otherChar = ADD_PLAYER("Friend", Vector3.new(-12, 3, -25))
 frames(10)
 check(#ERRORS == 0, "entity discovery without errors")
 
+-- Live players require explicit per-session allowlisting for Aim Lab and ESP.
+-- A test-target tag must not bypass that boundary for an actual Player.
+ADD_TAG(otherChar, "VEYLTestTarget")
+frames(6, 0.1)
+clickText(gui, "Entities")
+frames(12, 0.1)
+local function getFriendRow()
+    for _, candidate in ipairs(FIND_ALL(gui, function(x)
+        return CLASSNAME(x) == "TextLabel"
+            and string.find(PROPS(x).Text or "", "Friend", 1, true) ~= nil
+            and PROPS(x).Parent
+            and PROPS(PROPS(x).Parent).Name == "Row"
+    end)) do
+        return PROPS(candidate).Parent
+    end
+    return nil
+end
+local function friendDetail(row)
+    if not row then return nil, "" end
+    for _, candidate in ipairs(FIND_ALL(row, function(x)
+        return CLASSNAME(x) == "TextLabel"
+            and string.find(PROPS(x).Text or "", "A:", 1, true) ~= nil
+    end)) do
+        return candidate, PROPS(candidate).Text or ""
+    end
+    return nil, ""
+end
+local function friendAllowButton(row)
+    if not row then return nil end
+    for _, candidate in ipairs(FIND_ALL(row, function(x)
+        return CLASSNAME(x) == "TextButton"
+            and (PROPS(x).Text == "Allow" or PROPS(x).Text == "Revoke")
+    end)) do
+        return candidate
+    end
+    return nil
+end
+local friendRow = getFriendRow()
+local allowButton = friendAllowButton(friendRow)
+check(friendRow ~= nil and allowButton ~= nil, "live Player appears in Entities with an allowlist control")
+local _, initialScope = friendDetail(friendRow)
+check(string.find(initialScope, "A:—", 1, true) ~= nil
+    and string.find(initialScope, "E:—", 1, true) ~= nil,
+    "tagging a real Player does not bypass the allowlist")
+if allowButton then
+    if PROPS(allowButton).Text ~= "Allow" then FIRE(allowButton, "Activated"); frames(6, 0.1) end
+    FIRE(allowButton, "Activated")
+    frames(12, 0.1)
+    local _, allowedScope = friendDetail(friendRow)
+    check(string.find(allowedScope, "A:✓", 1, true) ~= nil
+        and string.find(allowedScope, "E:✓", 1, true) ~= nil,
+        "allowlisted real Player becomes eligible for Aim and ESP")
+    FIRE(allowButton, "Activated")
+    frames(12, 0.1)
+    local _, revokedScope = friendDetail(friendRow)
+    check(string.find(revokedScope, "A:—", 1, true) ~= nil
+        and string.find(revokedScope, "E:—", 1, true) ~= nil,
+        "revoking a real Player removes Aim and ESP eligibility")
+end
+clickText(gui, "Main")
+
 -- Tools
 local tool = Instance.new("Tool")
 tool.Name = "Assault Rifle"
