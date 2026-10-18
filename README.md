@@ -99,7 +99,7 @@ Hotkeys are ignored while you type in a text box or while a key is being capture
 
 ## Scope and honest limits
 
-- Aim Lab and ESP only cover three groups: tagged test targets, players you allowlist for the session in Entities, and (opt-in for Aim Lab) untagged NPCs.
+- Aim Lab and ESP only cover three groups: tagged non-player test targets, players you explicitly allowlist for the session in Entities, and (opt-in for Aim Lab) untagged NPCs. Player characters remain classified as Players even if tagged, so tags cannot bypass the session allowlist.
 - Aim Lab moves only your local camera. Whether a weapon's shots follow the camera depends on that weapon's own scripts.
 - Silent aim, shot redirection, magic bullet, desync, kicking, changing other players' health or position, and granting items need server authority. They are listed as unavailable and are not implemented.
 - Spotify and YouTube Music cannot play inside Roblox. Bookmarks are links you copy and open in a browser. No URL-opening API is used.
@@ -115,7 +115,7 @@ These checks were run on the modules, the loader and the bundle:
 - Every property and enum item passed to `Instance.new` helpers was checked against the Roblox API dump: 0 problems. Every module was also checked on its own for missing imports and for unused or shadowed locals: none found.
 - Smoke and behavior tests: the script ran in the Luau VM against a mock Roblox client, in both plain mode and executor-API mode. They cover startup, hotkeys, clicking every button twice, invalid input, ESP geometry (including near-plane clipping), the World restore rule, keybind collisions, music, renderer switching, config save/reload and malformed configs, emergency stop, re-execution, and leak-free shutdown.
 - Loader tests: 404 from a private repo, successful download, cache fallback, local mode, a module with a syntax error (the running session is left untouched), a module that fails while starting (partial state removed), and a non-https source.
-- Result: 4 suites, 101 checks, 0 failures (`tests/run.sh`).
+- Last recorded main-branch result: 4 suites, 101 checks, 0 failures (`tests/run.sh`). This branch adds explicit live-player allowlist regression coverage; rerun `tests/run.sh` before treating the new changes as verified.
 
 **Not verified:** a live Roblox client or executor session. The mock models only what VEYL touches. It also assumes executors run `loadstring` chunks in the executor's global environment, as common executors do.
 
